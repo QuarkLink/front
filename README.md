@@ -1,130 +1,177 @@
-# 短链管理系统前端
+# QuankLink 短链接管理系统前端
 
-这是一个基于 Vue 3 + Element Plus 的短链管理系统前端应用。
+QuankLink 是一个简洁高效的短链接生成和管理系统，帮助用户将长链接转换为简短易记的短链接。本仓库包含系统的前端部分。
 
-## 功能特性
+## 功能特点
 
-### 用户端功能
-- ✅ 创建短链接
-- ✅ 设置过期时间
-- ✅ 复制短链接
-- ✅ 响应式设计
-- ✅ 美观的用户界面
-
-### 管理端功能
-- ✅ 管理员登录认证
-- ✅ 短链接列表查询
-- ✅ 按原始链接/短链接筛选
-- ✅ 分页显示
-- ✅ 创建短链接
-- ✅ 编辑短链接
-- ✅ 删除短链接
-- ✅ 数据导出功能
+- **链接缩短**：快速将长 URL 转换为短链接
+- **自定义过期时间**：设置链接的有效期
+- **用户友好界面**：简洁直观的操作体验
+- **管理后台**：管理员可查看和管理所有链接
+- **Mock 数据**：内置模拟数据，无需后端即可运行演示
 
 ## 技术栈
 
-- **Vue 3** - 渐进式 JavaScript 框架
-- **Element Plus** - Vue 3 组件库
-- **Vue Router** - 官方路由管理器
-- **Axios** - HTTP 客户端
-- **ES6+** - 现代 JavaScript
+- **框架**：Vue 3
+- **UI 组件库**：Element Plus
+- **状态管理**：Vue Reactive API
+- **路由**：Vue Router
+- **HTTP 请求**：Axios
+- **构建工具**：Vite
+- **模拟数据**：内置 Mock 服务
+
+## 安装与运行
+
+### 环境要求
+
+- Node.js 16+
+- npm
+
+### 安装依赖
+
+```bash
+# 进入项目目录
+cd front
+
+# 安装依赖
+npm install
+```
+
+### 运行开发服务器
+
+```bash
+npm run dev
+```
+
+### 构建生产版本
+
+```bash
+npm run build
+```
 
 ## 项目结构
 
 ```
 front/
-├── public/                 # 静态资源
-│   └── index.html         # HTML 模板
+├── public/             # 静态资源
 ├── src/
-│   ├── api/               # API 接口
-│   │   └── index.js       # API 封装
-│   ├── router/            # 路由配置
-│   │   └── index.js       # 路由定义
-│   ├── views/             # 页面组件
-│   │   ├── UserPanel.vue  # 用户端页面
-│   │   └── AdminPanel.vue # 管理端页面
-│   ├── App.vue           # 根组件
-│   └── main.js           # 入口文件
-├── package.json          # 项目配置
-├── vue.config.js         # Vue CLI 配置
-└── README.md            # 项目说明
+│   ├── api/            # API 请求模块
+│   │   └── index.js    # API 接口定义和 Mock 实现
+│   ├── assets/         # 项目资源文件
+│   ├── components/     # 通用组件
+│   ├── router/         # 路由配置
+│   ├── views/          # 页面视图
+│   │   ├── AdminPanel.vue     # 管理后台
+│   │   ├── LoginPage.vue      # 登录页面
+│   │   └── UserPanel.vue      # 用户主页
+│   ├── App.vue         # 根组件
+│   └── main.js         # 入口文件
+└── index.html          # HTML 模板
 ```
 
-## 安装与运行
+## Mock 功能说明
 
-### 1. 安装依赖
-```bash
-npm install
-```
+本项目内置了 Mock 功能，可以在没有实际后端服务的情况下进行前端开发和演示：
 
-### 2. 开发模式运行
-```bash
-npm run serve
-```
+1. **登录验证**：模拟用户登录过程，不需要实际的身份验证服务
+2. **短链生成**：模拟短链接的生成和存储功能
+3. **链接管理**：模拟后端的链接列表查询、删除等操作
 
-应用将在 http://localhost:8080 启动
+所有模拟数据存储在浏览器的 localStorage 中，刷新页面后数据依然保留。
 
-### 3. 生产构建
-```bash
-npm run build
-```
+### Mock 实现位置
 
-## API 配置
+Mock 功能主要实现在以下文件中：
 
-当前使用 Mock 数据进行演示。要连接真实的 API，请：
+- `src/api/index.js` - 包含所有 API 接口的 Mock 实现和实际 API 调用（被注释掉）
+- `src/views/LoginPage.vue` - 包含登录验证的 Mock 实现
 
-1. 打开 `src/api/index.js`
-2. 注释掉 Mock 相关代码
-3. 取消注释实际的 API 调用代码
-4. 根据需要修改 `baseURL` 配置
+### 切换到真实后端
 
-## 页面说明
+要将项目从 Mock 数据切换到真实后端 API，需要进行以下修改：
 
-### 用户端 (/)
-- **功能**: 普通用户创建短链接
-- **特性**: 
-  - 输入原始 URL
-  - 可选设置过期时间
-  - 一键复制生成的短链接
-  - 直观的结果展示
+1. 在 `src/api/index.js` 中：
+   - 更新 `baseURL` 为实际的 API 服务器地址
+   ```javascript
+   const api = axios.create({
+       baseURL: 'https://你的实际API地址/v1', // 修改为你的实际API地址
+       timeout: 10000
+   })
+   ```
 
-### 管理端 (/admin)
-- **功能**: 管理员管理所有短链接
-- **特性**:
-  - 登录认证（演示版可使用任意账号密码）
-  - 短链接列表查看
-  - 高级搜索过滤
-  - 创建、编辑、删除操作
-  - 分页浏览
+2. 在各 API 方法中：
+   - 注释掉 Mock 响应代码块
+   - 取消注释实际 API 调用代码
+   ```javascript
+   // 例如在 createShortLink 方法中：
+   
+   // 注释掉 Mock 响应代码
+   /*
+   return new Promise((resolve) => {
+       setTimeout(() => {
+           resolve({
+               code: 0,
+               message: '创建成功',
+               data: generateMockShortLink()
+           })
+       }, 500)
+   })
+   */
+   
+   // 取消注释实际 API 调用
+   return api.post('/quank-links', data)
+   ```
 
-## 演示账号
+3. 在 `src/views/LoginPage.vue` 中：
+   - 替换 Mock 登录逻辑为实际的登录 API 调用，修改 handleLogin 函数：
+   ```javascript
+   // 将 Mock 登录代码：
+   setTimeout(() => {
+     const token = 'mock_admin_token_' + Date.now()
+     localStorage.setItem('admin_token', token)
+     // ...其余代码
+   }, 1000)
+   
+   // 替换为实际 API 调用：
+   try {
+     const result = await api.post('/login', {
+       username: loginForm.username,
+       password: loginForm.password
+     })
+     
+     if (result.code === 0) {
+       localStorage.setItem('admin_token', result.data.token)
+       localStorage.setItem('admin_user', loginForm.username)
+       // ...其余代码不变
+     } else {
+       ElMessage.error(result.message || '登录失败')
+     }
+   } catch (error) {
+     ElMessage.error('登录失败，请检查网络连接')
+   }
+   ```
 
-管理端登录（演示版）：
-- 用户名：任意
-- 密码：任意
+这样修改后，项目将使用真实的后端 API 而非 Mock 数据。
 
-## 开发说明
+## 使用说明
 
-### Mock 数据
-项目使用了 Mock 数据来模拟 API 响应，包括：
-- 短链接创建
-- 短链接查询
-- 短链接更新
-- 短链接删除
+### 前台用户界面
 
-### 响应式设计
-应用支持多种屏幕尺寸，在移动端和桌面端都有良好的用户体验。
+1. 在主页输入需要缩短的链接
+2. 可选择设置过期时间
+3. 点击"缩短"按钮生成短链接
+4. 生成后可以直接点击短链接进行复制
 
-### 主题和样式
-- 使用现代化的渐变背景
-- 半透明卡片设计
-- 统一的色彩方案
-- 流畅的动画效果
+### 管理员后台
 
-## API 文档参考
-
-详细的 API 接口说明请参考 `openapi.yaml` 文件。
+1. 通过登录页面进行身份验证（演示模式下任意用户名密码均可登录）
+2. 在管理后台可以查看所有链接
+3. 支持链接的查询、删除等操作
 
 ## 许可证
 
-MIT 
+MIT
+
+## 联系方式
+
+如有问题或建议，请联系项目维护者。 
