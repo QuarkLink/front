@@ -1,0 +1,315 @@
+openapi: "3.0.3"
+info:
+  title: 短链管理服务
+  version: "1.0"
+servers:
+  - url: https://api.server.test/v1
+paths:
+  /quank-links:
+    post:
+      summary: 普通用户创建短链接
+      description: 普通用户创建短链接，无需鉴权
+      security: []
+      x-rate-limit:
+        requests: 100
+        per: minute
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateReq"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateRsp"
+
+  /admin/quank-links:
+    get:
+      summary: 管理后台查询短链接
+      description: >
+        管理后台查询短链接，需要鉴权，支持以下过滤组合：
+        - 同时指定origin_url和short_url时，按AND逻辑查询
+        - 不提供过滤参数时，返回所有短链接
+      security:
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/AdminOriginUrlFilter"
+        - $ref: "#/components/parameters/AdminShortUrlFilter"
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/PageSizeParam"
+        - $ref: "#/components/parameters/SortParam"
+        - $ref: "#/components/parameters/OrderParam"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminQueryRsp"
+    post:
+      summary: 管理后台创建短链接
+      description: 管理后台创建短链接，需要鉴权
+      security:
+        - AdminAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminCreateReq"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminCreateRsp"
+  /admin/quank-links/{id}:
+    delete:
+      summary: 管理后台删除短链接
+      description: 管理后台删除短链接，需要鉴权
+      security:
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminDeleteRsp"
+
+    patch:
+      summary: 管理后台更新短链接
+      description: 管理后台更新短链接，需要鉴权
+      security:
+        - AdminAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminUpdateReq"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminUpdateRsp"
+components:
+  schemas:
+    BaseRsp:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: >
+            状态码
+            0: 成功
+            1: 请求参数错误
+            2: 服务器内部错误
+          example: 0
+        message:
+          type: string
+          description: 状态码描述
+    BaseCreateReq:
+      type: object
+      required:
+        - origin_url
+      properties:
+        origin_url:
+          type: string
+          description: 原始链接
+          example: https://www.example.com
+        expire_at:
+          type: integer
+          description: 过期时间（Unix时间戳，单位秒），配置文件中设置默认值
+          example: 1716729600
+    ShortLink:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: 短链唯一标识
+          example: 1
+        origin_url:
+          type: string
+          description: 原始链接
+          example: https://www.example.com
+        short_url:
+          type: string
+          description: 短链接
+          example: https://www.s.example.com/asd
+        expire_at:
+          type: integer
+          description: 过期时间（Unix时间戳，单位秒）
+          example: 1716729600
+    CreateReq:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/BaseCreateReq"
+    CreateRsp:
+      allOf:
+        - $ref: "#/components/schemas/BaseRsp"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/ShortLink"
+    AdminCreateReq:
+      type: object
+      required:
+        - origin_url
+      allOf:
+        - $ref: "#/components/schemas/BaseCreateReq"
+        - type: object
+          properties:
+            short_url:
+              type: string
+              description: 短链接，如果为空，则自动生成
+              example: https://www.s.example.com/asd
+    AdminCreateRsp:
+      allOf:
+        - $ref: "#/components/schemas/BaseRsp"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/ShortLink"
+    AdminDeleteRsp:
+      allOf:
+        - $ref: "#/components/schemas/BaseRsp"
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  description: 短链唯一标识
+                  example: 1
+    AdminUpdateReq:
+      type: object
+      properties:
+        short_url:
+          type: string
+          description: 短链接，如果为null或者""则不更新短链接
+          example: https://www.s.example.com/asd
+          nullable: true
+        expire_at:
+          type: integer
+          description: 过期时间（Unix时间戳，单位秒），如果为null或者0则不设置过期时间
+          example: 1716729600
+          nullable: true
+      anyOf:
+        - required:
+            - short_url
+        - required:
+            - expire_at
+    AdminUpdateRsp:
+      allOf:
+        - $ref: "#/components/schemas/BaseRsp"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/ShortLink"
+    AdminQueryRsp:
+      allOf:
+        - $ref: "#/components/schemas/BaseRsp"
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                total:
+                  type: integer
+                  description: 总条数
+                  example: 100
+                list:
+                  type: array
+                  description: 数据
+                  items:
+                    allOf:
+                      - $ref: "#/components/schemas/ShortLink"
+                      - type: object
+                        properties:
+                          is_expired:
+                            type: boolean
+                            description: 是否过期
+                            example: false
+  parameters:
+    IdParam:
+      name: id
+      in: path
+      required: true
+      description: 短链唯一标识
+      schema:
+        type: integer
+        example: 1
+    AdminOriginUrlFilter:
+      name: origin_url
+      in: query
+      description: 原始链接
+      schema:
+        type: string
+        example: https://www.example.com
+    AdminShortUrlFilter:
+      name: short_url
+      in: query
+      description: 短链接
+      schema:
+        type: string
+        example: https://www.s.example.com/asd
+    PageParam:
+      name: page
+      in: query
+      description: 页码
+      schema:
+        type: integer
+        default: 1
+        minimum: 1
+        example: 1
+    PageSizeParam:
+      name: page_size
+      in: query
+      description: 每页条数，配置文件中设置默认值
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        example: 10
+    SortParam:
+      name: sort
+      in: query
+      description: 排序方式
+      schema:
+        type: string
+        enum:
+          - id
+          - origin_url
+          - short_url
+          - expire_at
+        default: "id"
+        example: "id"
+    OrderParam:
+      name: order
+      in: query
+      description: 排序方式
+      schema:
+        type: string
+        enum:
+          - asc
+          - desc
+        default: "asc"
+        example: "asc"
+  securitySchemes:
+    AdminAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
